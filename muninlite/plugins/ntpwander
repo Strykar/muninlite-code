@@ -1,0 +1,24 @@
+config_ntpwander() {
+  echo "graph_title NTP Frequency Offset vs clock wander (PPM)"
+  echo "graph_args -l 0 --base 1000 --vertical-label ppm"
+  echo "graph_category time"
+  echo "frequency.label Frequency offset"
+  echo "frequency.update_rate 10"
+  echo "frequency.draw LINE2"
+  echo "wander.label Clock wander"
+  echo "wander.update_rate 10"
+  echo "wander.draw LINE2"
+  echo "graph_info Frequency offset relative to the hardware clock and the local clock frequency wander in parts-per-million (PPM)."
+}
+fetch_ntpwander() {
+  _ntpq="/usr/bin/ntpq"
+  FREQUENCY=0
+  WANDER=0
+  if [ -x "$_ntpq" ]; then
+      DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+      FREQUENCY=$(echo "$DATA" | /bin/grep frequency | /usr/bin/awk -F'=' '{print $2}')
+      WANDER=$(echo "$DATA" | /bin/grep clk_wander | /usr/bin/awk -F'=' '{print $2}')
+  fi
+  echo "frequency.value $FREQUENCY"
+  echo "wander.value $WANDER"
+}
