@@ -1,0 +1,18 @@
+config_ntpoffset() {
+  echo "graph_title NTP Combined Peer Offset"
+  echo "graph_args -l 0 --base 1000 --vertical-label milliseconds"
+  echo "graph_category time"
+  echo "offset.label Combined Peer Offset"
+  echo "offset.update_rate 10"
+  echo "offset.draw LINE2"
+  echo "graph_info OFFSET is the combined offset of peers relative to this host in milliseconds."
+}
+fetch_ntpoffset() {
+  _ntpq="/usr/bin/ntpq"
+  OFFSET=0
+  if [ -x "$_ntpq" ]; then
+      DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+      OFFSET=$(echo "$DATA" | /bin/grep offset | /usr/bin/awk -F'=' '{print $2}')
+  fi
+  echo "offset.value $OFFSET"
+}
