@@ -1,0 +1,18 @@
+config_ntpdisp() {
+  echo "graph_title NTP Root Dispersion"
+  echo "graph_args -l 0 --base 1000 --vertical-label microseconds"
+  echo "graph_category time"
+  echo "dispersion.label Root Dispersion"
+  echo "dispersion.update_rate 10"
+  echo "dispersion.draw LINE2"
+  echo "graph_info ROOTDISP is the maximum time difference that was ever observed between the local clock and the primary reference clock in microseconds."
+}
+fetch_ntpdisp() {
+  _ntpq="/usr/bin/ntpq"
+  DISPERSION=0
+  if [ -x "$_ntpq" ]; then
+      DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+      DISPERSION=$(echo "$DATA" | /bin/grep rootdisp | /usr/bin/awk -F'=' '{print $2}')
+  fi
+  echo "dispersion.value $DISPERSION"
+}
