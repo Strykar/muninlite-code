@@ -1,0 +1,32 @@
+_ntpq="/usr/bin/ntpq"
+DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+REFID=$(echo "$DATA" | /bin/grep refid | /usr/bin/awk -F'=' '{print $2}')
+config_ntpstratum() {
+  echo "graph_title NTP Peer Stratum, Clock precision and TAI-UTC offset"
+  echo "graph_args -l 0 --base 1000 --vertical-label Stratum/Seconds"
+  echo "graph_category time"
+  echo "stratum.label $REFID"
+  echo "stratum.min 0"
+  echo "stratum.max 15"
+  echo "stratum.draw LINE2"
+  echo "precision.label Clock Precision"
+  echo "precision.draw LINE2"
+  echo "tai.label TAI-UTC Offset"
+  echo "tai.draw LINE2"
+  echo "graph_info Peer stratum number, which can range from 1-15. Stratum 1 is commonly GPS/PPS. Clock precision (log2 s) and Tai is the TAI-UTC offset (s), both in seconds."
+}
+fetch_ntpstratum() {
+  _ntpq="/usr/bin/ntpq"
+  STRATUM=0
+  PRECISION=0
+  TAI=0
+  if [ -x "$_ntpq" ]; then
+      DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+      PRECISION=$(echo "$DATA" | /bin/grep precision | /usr/bin/awk -F'=' '{print $2}')
+	  STRATUM=$(echo "$DATA" | /bin/grep stratum | /usr/bin/awk -F'=' '{print $2}')
+	  TAI=$(echo "$DATA" | /bin/grep tai | /usr/bin/awk -F'=' '{print $2}')
+  fi
+  echo "precision.value $PRECISION"
+  echo "stratum.value $STRATUM"
+  echo "tai.value $TAI"
+}
