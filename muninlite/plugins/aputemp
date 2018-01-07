@@ -1,0 +1,22 @@
+config_aputemp() {
+  echo "graph_title CPU & mSATA SSD temperature"
+  echo "graph_args --base 1000 --vertical-label Celsius"
+  echo "graph_category sensors"
+  echo "cpu_temp_input.label CPU temperature"
+  echo "cpu_temp_input.draw LINE2"
+  echo "sda_temp.label mSATA SSD temperature"
+  echo "sda_temp.draw LINE2"
+  echo "graph_info k10temp (high = +70.0C crit = +105.0C, hyst = +104.0C). SMART ID #194 Temperature_Celsius"
+}
+fetch_aputemp() {
+  _aputemp1="/usr/sbin/smartctl"
+  _aputemp2="/usr/sbin/sensors"
+  CPUT=0
+  SSDT=0
+  if [ -x "$_aputemp1" ]; then 
+      SSDT=$($_aputemp1 -A /dev/sda | awk ' $1 == "194" { print $10 } ')
+      CPUT=$($_aputemp2 -u | awk ' $1 == "temp1_input:" { print $2 } ')
+  fi
+  echo "sda_temp.value $SSDT"
+  echo "cpu_temp_input.value $CPUT"
+}
