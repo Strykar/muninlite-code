@@ -1,0 +1,24 @@
+config_ntpjitter() {
+  echo "graph_title NTP combined system vs clock jitter"
+  echo "graph_args -l 0 --base 1000 --vertical-label milliseconds"
+  echo "graph_category time"
+  echo "sys_jitter.label Combined system jitter"
+  echo "sys_jitter.update_rate 10"
+  echo "sys_jitter.draw LINE2"
+  echo "clk_jitter.label Clock jitter"
+  echo "clk_jitter.update_rate 10"
+  echo "clk_jitter.draw LINE2"
+  echo "graph_info Exponentially-weighted RMS averages of the combined system vs clock jitter in milliseconds."
+}
+fetch_ntpjitter() {
+  _ntpq="/usr/bin/ntpq"
+  SYS_JITTER=0
+  CLK_JITTER=0
+  if [ -x "$_ntpq" ]; then
+      DATA=$($_ntpq -4 -c rv | /usr/bin/awk 'BEGIN{ RS=","}{ print }')
+      SYS_JITTER=$(echo "$DATA" | /bin/grep sys_jitter | /usr/bin/awk -F'=' '{print $2}')
+      CLK_JITTER=$(echo "$DATA" | /bin/grep clk_jitter | /usr/bin/awk -F'=' '{print $2}')
+  fi
+  echo "sys_jitter.value $SYS_JITTER"
+  echo "clk_jitter.value $CLK_JITTER"
+}
