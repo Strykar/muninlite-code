@@ -15,3 +15,7 @@ These distributions are known to be working with muninlite:
 * OpenSuSE 10.2 
  - Just works 
 
+* LEDE/OpenWrt SNAPSHOT r5638-0f72690a2d
+ - opkg install xinetd; don't forget to restart xinetd after any changes
+ 
+ 
